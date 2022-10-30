@@ -147,7 +147,7 @@ func main() {
 
 Output:
 
-```json
+```
 music:{"musicId": 1965687934, "musicName": "洛天依印象曲·华风夏韵", "artist":[["Tino.S3", 12002114]], "albumId": 148413696, "album": "洛天依印象曲·华风夏韵", "albumPicDocId": "109951167697837238", "albumPic": "https://p1.music.126.net/1oZ0ftxNE5DGzwvO97bfLA==/109951167697837238.jpg", "bitrate": 320000, "mp3DocId": "7ee41abd08e7e829b41dfd7b0689a256", "duration": 207158, "mvId": 0, "alias":[], "format": "mp3"}
 ```
   
