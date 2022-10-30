@@ -55,7 +55,7 @@ func Encrypt163Key(decrypted string) (encrypted string) {
 
 // Decrypt163key decrypts the 163 key string
 func Decrypt163key(encrypted string) (decrypted string) {
-	strings.TrimPrefix(encrypted, "163 key(Don't modify):")
+	encrypted = strings.TrimPrefix(encrypted, "163 key(Don't modify):")
 	data, _ := base64.StdEncoding.DecodeString(encrypted)
 	return string(utils.MarkerDecrypt(data))
 }
