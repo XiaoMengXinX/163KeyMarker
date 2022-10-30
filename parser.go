@@ -12,19 +12,24 @@ import (
 	"github.com/go-flac/go-flac"
 )
 
-// Parse163Key parse 163 key from reader
-func Parse163Key(file *os.File) (marker MarkerData, err error) {
+// Parse163Key detects file type and parses the embed 163 key from file
+func Parse163Key(musicFile io.Reader) (marker MarkerData, err error) {
+	file, ok := musicFile.(*os.File)
+	if !ok {
+		return marker, fmt.Errorf("musicFile was not initialized with file")
+	}
 	fileType := detectFileType(file)
 	switch fileType {
 	case FileTypeMp3:
-		return ReadMp3Key(file)
+		return Parse163KeyFromMp3File(file)
 	case FileTypeFlac:
-		return ReadFlacKey(file)
+		return Parse163KeyFromFlacFile(file)
 	}
-	return marker, fmt.Errorf("invaid file type ")
+	return marker, fmt.Errorf("invaid file type")
 }
 
-func ReadMp3Key(file io.Reader) (marker MarkerData, err error) {
+// Parse163KeyFromMp3File parses the embed 163 key from mp3 file
+func Parse163KeyFromMp3File(file *os.File) (marker MarkerData, err error) {
 	tag, err := id3v2.ParseReader(file, id3v2.Options{Parse: true})
 	if err != nil {
 		return marker, err
@@ -52,7 +57,8 @@ func ReadMp3Key(file io.Reader) (marker MarkerData, err error) {
 	return marker, fmt.Errorf("invaid comment frame ")
 }
 
-func ReadFlacKey(file io.Reader) (marker MarkerData, err error) {
+// Parse163KeyFromFlacFile parses the embed 163 key from flac file
+func Parse163KeyFromFlacFile(file *os.File) (marker MarkerData, err error) {
 	flacFile, err := flac.ParseMetadata(file)
 	if err != nil {
 		return marker, err
@@ -74,7 +80,7 @@ func ReadFlacKey(file io.Reader) (marker MarkerData, err error) {
 	}
 	if strings.Contains(comment[0], "163 key(Don't modify):") && len(comment) != 0 {
 		markerText := strings.TrimPrefix(comment[0], "163 key(Don't modify):")
-		markerJson := strings.Replace(Decrypt163key(markerText), "music:", "", 1)
+		markerJson := strings.TrimPrefix(Decrypt163key(markerText), "music:")
 		var marker MarkerData
 		_ = json.Unmarshal([]byte(markerJson), &marker)
 		return marker, err

@@ -10,6 +10,7 @@ import (
 	"github.com/XiaoMengXinX/Music163Api-Go/utils"
 )
 
+// CreateMarker creates marker data from SongDetailData and SongURLData
 func CreateMarker(songDetail types.SongDetailData, songUrl types.SongURLData) (marker MarkerData) {
 	var artists [][]interface{}
 	for _, j := range songDetail.Ar {
@@ -36,6 +37,7 @@ func CreateMarker(songDetail types.SongDetailData, songUrl types.SongURLData) (m
 	}
 }
 
+// Create163KeyStr formats the marker data to 163 key string
 func Create163KeyStr(marker MarkerData) (markerText string) {
 	markerJson, err := json.Marshal(marker)
 	if err != nil {
@@ -46,10 +48,12 @@ func Create163KeyStr(marker MarkerData) (markerText string) {
 	return markerText
 }
 
+// Encrypt163Key encrypts the 163 key string
 func Encrypt163Key(decrypted string) (encrypted string) {
 	return base64.StdEncoding.EncodeToString(utils.MarkerEncrypt(decrypted))
 }
 
+// Decrypt163key decrypts the 163 key string
 func Decrypt163key(encrypted string) (decrypted string) {
 	strings.TrimPrefix(encrypted, "163 key(Don't modify):")
 	data, _ := base64.StdEncoding.DecodeString(encrypted)

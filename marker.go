@@ -12,23 +12,29 @@ import (
 	"github.com/go-flac/go-flac"
 )
 
-func AddMusicID3V2(musicFile *os.File, picFile io.Reader, marker MarkerData) (err error) {
-	fileType := detectFileType(musicFile)
+// AddMusicID3V2 detects the music file type and adds ID3V2 tags to it.
+func AddMusicID3V2(musicFile, picFile io.Reader, marker MarkerData) (err error) {
+	file, ok := musicFile.(*os.File)
+	if !ok {
+		return fmt.Errorf("musicFile was not initialized with file")
+	}
+	fileType := detectFileType(file)
 	switch fileType {
 	case FileTypeMp3:
-		return AddMp3Id3v2(musicFile, picFile, marker)
+		return AddMp3Id3v2(file, picFile, marker)
 	case FileTypeFlac:
-		return AddFlacId3v2(musicFile, picFile, marker)
+		return AddFlacId3v2(file, picFile, marker)
 	}
 	return fmt.Errorf("invaid file type")
 }
 
+// AddMp3Id3v2 adds ID3V2 tags to mp3 file.
 func AddMp3Id3v2(musicFile *os.File, picFile io.Reader, marker MarkerData) (err error) {
 	musicTag, _ := id3v2.ParseReader(musicFile, id3v2.Options{Parse: false})
 	defer musicTag.Close()
 	musicTag.SetDefaultEncoding(id3v2.EncodingUTF8)
 	musicTag.SetTitle(marker.MusicName)
-	musicTag.SetArtist(formatArtistsStr(marker))
+	musicTag.SetArtist(FormatArtistsStr(marker))
 	if marker.Album != "" {
 		musicTag.SetAlbum(marker.Album)
 	}
@@ -60,6 +66,7 @@ func AddMp3Id3v2(musicFile *os.File, picFile io.Reader, marker MarkerData) (err 
 	return nil
 }
 
+// AddFlacId3v2 adds ID3V2 tags to flac file.
 func AddFlacId3v2(musicFile *os.File, picFile io.Reader, marker MarkerData) (err error) {
 	var file flacFile
 	err = file.Parse(musicFile)
@@ -83,7 +90,7 @@ func AddFlacId3v2(musicFile *os.File, picFile io.Reader, marker MarkerData) (err
 	}
 
 	_ = tag.Add(flacvorbis.FIELD_TITLE, marker.MusicName)
-	_ = tag.Add(flacvorbis.FIELD_ARTIST, formatArtistsStr(marker))
+	_ = tag.Add(flacvorbis.FIELD_ARTIST, FormatArtistsStr(marker))
 	if marker.Album != "" {
 		_ = tag.Add(flacvorbis.FIELD_ALBUM, marker.Album)
 	}

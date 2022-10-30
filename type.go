@@ -1,6 +1,6 @@
 package marker
 
-// MarkerData format data of 163 key
+// MarkerData is the format data of 163 key
 type MarkerData struct {
 	MusicId       int             `json:"musicId"`
 	MusicName     string          `json:"musicName"`
