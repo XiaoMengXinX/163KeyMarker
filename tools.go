@@ -4,12 +4,27 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 )
 
 const (
 	FileTypeMp3 = iota
 	FileTypeFlac
 )
+
+// FormatArtistsStr formats the artists slice into a string.
+// For example, if the artists slice is ["A", "B", "C"], the result will be "A, B, C".
+func FormatArtistsStr(marker MarkerData) string {
+	var artists string
+	for i, ar := range marker.Artist {
+		if i == 0 {
+			artists = ar[0].(string)
+		} else {
+			artists = fmt.Sprintf("%s, %s", artists, ar[0].(string))
+		}
+	}
+	return artists
+}
 
 func detectFileType(file *os.File) int {
 	buf := make([]byte, 32)
@@ -27,14 +42,22 @@ func detectFileType(file *os.File) int {
 	return -1
 }
 
-func formatArtistsStr(marker MarkerData) string {
-	var artists string
-	for i, ar := range marker.Artist {
-		if i == 0 {
-			artists = ar[0].(string)
-		} else {
-			artists = fmt.Sprintf("%s, %s", artists, ar[0].(string))
-		}
+var bsPool = sync.Pool{
+	New: func() interface{} { return nil },
+}
+
+func getByteSlice(size int) []byte {
+	fromPool := bsPool.Get()
+	if fromPool == nil {
+		return make([]byte, size)
 	}
-	return artists
+	bs := fromPool.([]byte)
+	if cap(bs) < size {
+		bs = make([]byte, size)
+	}
+	return bs[0:size]
+}
+
+func putByteSlice(b []byte) {
+	bsPool.Put(b)
 }
